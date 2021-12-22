@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,15 +8,35 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
+  Platform,
 } from "react-native";
 import COLORS from "../../consts/colors";
-import products from "../../consts/products";
+//import products from "../../consts/products";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import { Rating, AirbnbRating } from "react-native-ratings";
+import productAPI from "../../apis/products";
 const width = Dimensions.get("screen").width / 2 - 30;
 const HomeScreen = ({ navigation }) => {
   const categories = ["STREET WEAR", "HODIE", "PANTS", "SHORT"];
 
   const [categoryIndex, setCategoryIndex] = React.useState(0);
+
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    getProductsFromAPI();
+  }, []);
+
+  function getProductsFromAPI() {
+    productAPI
+      .get("products") // request content
+      .then(async function (response) {
+        setProducts(response.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
 
   const CategoryList = () => {
     return (
@@ -43,28 +63,62 @@ const HomeScreen = ({ navigation }) => {
 
   const Card = ({ product }) => {
     return (
-      <TouchableOpacity onPress={() => navigation.navigate('Details',product)}>
+      <TouchableOpacity onPress={() => navigation.navigate("Details", product)}>
         <View style={style.card}>
           <View style={{ height: 100, alignItems: "center" }}>
             <Image
-              style={{ flex: 1, resizeMode: "contain" }}
-              source={product.img}
+              style={
+            Platform.OS === "ios"
+              ? { resizeMode: "contain", flex: 1 }
+              : { resizeMode: "contain", flex: 1, width: 100, height: 100 }
+          }
+              source={{uri:product.image[0]}}
             />
           </View>
-          <Text style={{ fontWeight: "bold", fontSize: 17, marginTop: 10 }}>
-            {product.name}
+          <Text
+            numberOfLines={2}
+            style={{
+              fontWeight: "normal",
+              fontSize: 12,
+              marginTop: 10,
+              overflow: "hidden",
+            }}
+          >
+            {product.realname}
           </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              position: "absolute",
+              paddingHorizontal: 15,
+              bottom: 45,
+            }}
+          >
+            <Rating
+              type="star"
+              fractions={1}
+              startingValue={product.rating}
+              readonly
+              imageSize={18}
+              type="custom"
+              tintColor="#F1F1F1"
+              style={{ backgroundColor: COLORS.light }}
+            />
+          </View>
           <View
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
               marginTop: 5,
-              position: 'absolute',
+              position: "absolute",
               paddingHorizontal: 15,
               bottom: 10,
-            }}>
-            <Text style={{ fontSize: 19, fontWeight: "bold" }}>
-              {product.price}
+            }}
+          >
+            <Text
+              style={{ fontSize: 19, fontWeight: "normal", color: "#ff1930" }}
+            >
+              {product.cost}d
             </Text>
             <View
               style={{
@@ -75,8 +129,15 @@ const HomeScreen = ({ navigation }) => {
                 justifyContent: "center",
                 alignItems: "center",
                 marginLeft: 20,
-              }}>
-              <Text style={{fontSize: 22, color: COLORS.white, fontWeight: "bold",}}>
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 22,
+                  color: COLORS.white,
+                  fontWeight: "bold",
+                }}
+              >
                 +
               </Text>
             </View>
@@ -120,8 +181,9 @@ const HomeScreen = ({ navigation }) => {
           paddingBottom: 50,
         }}
         numColumns={2}
-        data={products}
+        data={products.data}
         renderItem={({ item }) => <Card product={item} />}
+        keyExtractor={(item, index) => index.toString()}
       />
     </View>
   );
@@ -129,7 +191,7 @@ const HomeScreen = ({ navigation }) => {
 
 const style = StyleSheet.create({
   header: {
-    marginTop: 30,
+    marginTop: 10,
     flexDirection: "row",
     justifyContent: "space-between",
   },

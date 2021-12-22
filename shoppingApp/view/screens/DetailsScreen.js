@@ -1,10 +1,35 @@
-import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Platform,
+  TouchableOpacity,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import RNPickerSelect from "react-native-picker-select";
+import { Rating} from "react-native-ratings";
 import COLORS from "../../consts/colors";
 
 const DetailsScreen = ({ navigation, route }) => {
   const product = route.params;
+
+  const [quantityValue, setQuantityValue] = useState(0);
+
+  function increaseQuantityHandler() {
+    setQuantityValue(function (prev) {
+      return prev + 1;
+    });
+  }
+
+  function decreaseQuantityHandler() {
+    setQuantityValue(function (prev) {
+      if (prev === 0) return prev;
+      return prev - 1;
+    });
+  }
+
   return (
     <View
       style={{
@@ -19,8 +44,13 @@ const DetailsScreen = ({ navigation, route }) => {
       </View>
       <View style={style.imageContainer}>
         <Image
-          source={product.img}
-          style={{ resizeMode: "contain", flex: 1 }}
+          source={{uri:product.image[0]}}
+          // source={require('../../assets/3.png')}
+          style={
+            Platform.OS === "ios"
+              ? { resizeMode: "contain", flex: 1 }
+              : { resizeMode: "contain", flex: 1, width: 400, height: 400 }
+          }
         />
       </View>
       <View style={style.detailsContainer}>
@@ -28,11 +58,32 @@ const DetailsScreen = ({ navigation, route }) => {
           style={{
             marginLeft: 20,
             flexDirection: "row",
-            alignItems: "flex-end",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          <View style={style.line} />
-          <Text style={{ fontSize: 18, fontWeight: "bold" }}>Best Choice</Text>
+          <Rating
+            type="star"
+            fractions={1}
+            startingValue={product.rating}
+            readonly
+            imageSize={25}
+            type="custom"
+            tintColor="#F1F1F1"
+            style={{ backgroundColor: COLORS.light }}
+          />
+          <View style={style.priceTag}>
+            <Text
+              style={{
+                marginLeft: 15,
+                color: COLORS.white,
+                fontWeight: "bold",
+                fontSize: 16,
+              }}
+            >
+              {product.cost}
+            </Text>
+          </View>
         </View>
         <View
           style={{
@@ -44,20 +95,8 @@ const DetailsScreen = ({ navigation, route }) => {
           }}
         >
           <Text style={{ fontSize: 22, fontWeight: "bold" }}>
-            {product.name}
+            {product.realname}
           </Text>
-          <View style={style.priceTag}>
-            <Text
-              style={{
-                marginLeft: 15,
-                color: COLORS.white,
-                fontWeight: "bold",
-                fontSize: 16,
-              }}
-            >
-              {product.price}
-            </Text>
-          </View>
         </View>
         <View style={{ paddingHorizontal: 20, marginTop: 10 }}>
           <Text style={{ fontSize: 20, fontWeight: "bold" }}>About</Text>
@@ -69,20 +108,55 @@ const DetailsScreen = ({ navigation, route }) => {
               marginTop: 20,
             }}
           >
-            {product.about}
+            {product.description}
           </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginTop: 10,
+            }}
+          >
+            <RNPickerSelect
+              style={pickerSelectStyles}
+              onValueChange={(value) => console.log(value)}
+              placeholder={{
+                label: "Select a size...",
+                value: null,
+              }}
+              items={[
+                { label: "M", value: "M" },
+                { label: "L", value: "L" },
+              ]}
+            />
+            <RNPickerSelect
+              style={pickerSelectStyles}
+              onValueChange={(value) => console.log(value)}
+              placeholder={{
+                label: "Select a color...",
+                value: null,
+              }}
+              useNativeAndroidPickerStyle={false}
+              items={[
+                { label: "Red", value: "Red" },
+                { label: "Black", value: "Black" },
+                { label: "White", value: "White" },
+              ]}
+            />
+          </View>
           <View
             style={{
               marginTop: 20,
               flexDirection: "row",
               justifyContent: "space-between",
-              
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View style={style.borderBtn}>
-                <Text style={style.borderBtnText}>-</Text>
-              </View>
+            <TouchableOpacity onPress={decreaseQuantityHandler}>
+                <View style={style.borderBtn}>
+                  <Text style={style.borderBtnText}>-</Text>
+                </View>
+              </TouchableOpacity>
               <Text
                 style={{
                   fontSize: 20,
@@ -90,14 +164,24 @@ const DetailsScreen = ({ navigation, route }) => {
                   fontWeight: "bold",
                 }}
               >
-                1
+                {quantityValue}
               </Text>
-              <View style={style.borderBtn}>
-                <Text style={style.borderBtnText}>+</Text>
-              </View>
+              <TouchableOpacity onPress={increaseQuantityHandler}>
+                <View style={style.borderBtn}>
+                  <Text style={style.borderBtnText}>+</Text>
+                </View>
+              </TouchableOpacity>
             </View>
             <View style={style.buyBtn}>
-                <Text style={{color:COLORS.white, fontSize:18, fontWeight:'bold'}}>Buy</Text>
+              <Text
+                style={{
+                  color: COLORS.white,
+                  fontSize: 18,
+                  fontWeight: "bold",
+                }}
+              >
+                Buy
+              </Text>
             </View>
           </View>
         </View>
@@ -160,9 +244,34 @@ const style = StyleSheet.create({
     width: 150,
     height: 50,
     backgroundColor: COLORS.orange,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: 30,
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    width: 150,
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "gray",
+    borderRadius: 4,
+    color: "black",
+    paddingRight: 30, // to ensure the text is never behind the icon
+  },
+  inputAndroid: {
+    width: 150,
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 0.5,
+    borderColor: "purple",
+    borderRadius: 8,
+    color: "black",
+    paddingRight: 30, // to ensure the text is never behind the icon
   },
 });
 
