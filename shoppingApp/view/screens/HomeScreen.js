@@ -14,22 +14,28 @@ import COLORS from "../../consts/colors";
 //import products from "../../consts/products";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Rating, AirbnbRating } from "react-native-ratings";
-import productAPI from "../../apis/products";
+import { NavigationContainer } from "@react-navigation/native";
+import APIKit from "../../apis/APIKit";
+import AuthContext from "../../auth/context";
+
 const width = Dimensions.get("screen").width / 2 - 30;
 const HomeScreen = ({ navigation }) => {
   const categories = ["STREET WEAR", "HODIE", "PANTS", "SHORT"];
 
   const [categoryIndex, setCategoryIndex] = React.useState(0);
 
+  const tabs = ["Login", "SignUp"];
+
   const [products, setProducts] = useState([]);
+
+  const [user, setUser] = useState();
 
   useEffect(() => {
     getProductsFromAPI();
   }, []);
 
   function getProductsFromAPI() {
-    productAPI
-      .get("products") // request content
+    APIKit.get("products") // request content
       .then(async function (response) {
         setProducts(response.data);
       })
@@ -37,6 +43,22 @@ const HomeScreen = ({ navigation }) => {
         console.log(error);
       });
   }
+
+  const TabList = () => {
+    return (
+      <View style={style.tabContainer}>
+        {tabs.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate(`${item}`)}
+          >
+            <Text style={style.tabTextStyle}> {item} </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
 
   const CategoryList = () => {
     return (
@@ -68,11 +90,11 @@ const HomeScreen = ({ navigation }) => {
           <View style={{ height: 100, alignItems: "center" }}>
             <Image
               style={
-            Platform.OS === "ios"
-              ? { resizeMode: "contain", flex: 1 }
-              : { resizeMode: "contain", flex: 1, width: 100, height: 100 }
-          }
-              source={{uri:product.image[0]}}
+                Platform.OS === "ios"
+                  ? { resizeMode: "contain", flex: 1 }
+                  : { resizeMode: "contain", flex: 1, width: 100, height: 100 }
+              }
+              source={{ uri: product.image[0] }}
             />
           </View>
           <Text
@@ -164,8 +186,22 @@ const HomeScreen = ({ navigation }) => {
             Oliva Shop
           </Text>
         </View>
-        <Icon name="shopping-cart" size={28} />
+        <TouchableOpacity onPress={() => navigation.navigate("Cart")}>
+          <Icon name="shopping-cart" size={28} />
+        </TouchableOpacity>
       </View>
+      <AuthContext.Provider value={{ user, setUser }}>
+
+          {user ? (
+            <Text>user.name </Text>
+          ) : (
+            <View>
+            <TabList />
+            </View>
+          )}
+
+      </AuthContext.Provider>
+
       <View style={{ marginTop: 30, flexDirection: "row" }}>
         <View style={style.searchContainer}>
           <Icon name="search" size={25} style={{ marginLeft: 20 }} />
@@ -235,6 +271,11 @@ const style = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 20,
     padding: 15,
+  },
+  tabContainer: {
+    flexDirection: "row",
+    marginTop: 10,
+    justifyContent: "flex-start",
   },
 });
 
