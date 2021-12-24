@@ -68,10 +68,7 @@ function Login({ navigation }) {
     const user = response.data;
 
     authContext.setUser(user);
-
-    return (
-      <HomeScreen/>
-    );
+    navigation.navigate('Home');
 
   } catch (error) {
     console.log(error);
@@ -163,9 +160,9 @@ function Login({ navigation }) {
           </Text>
         </View>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => NavigateToSignUp(props)}>
+      <TouchableOpacity>
         <View style={styles.styleButtons2}>
-          <Text style={styles.styleInsideBtn2}> Sign Up </Text>
+          <Text style={styles.styleInsideBtn2} onPress={() => navigation.navigate('SignUp')}> Sign Up </Text>
         </View>
       </TouchableOpacity>
     </SafeAreaView>

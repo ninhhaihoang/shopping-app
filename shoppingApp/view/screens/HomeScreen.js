@@ -210,7 +210,7 @@ function HomeScreen({ navigation }) {
           <TextInput placeholder="Search" style={style.input} />
         </View>
       </View>
-      <CategoryList />
+      {/* <CategoryList /> */}
       <FlatList
         columnWrapperStyle={{ justifyContent: "space-between" }}
         showsVerticalScrollIndicator={false}

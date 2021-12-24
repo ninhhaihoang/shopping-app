@@ -78,6 +78,7 @@ const SignUp = (props) => {
   const onSignUp = async () => { 
    const response = await APIKit.post('/users',data);
    console.log(response) 
+   NavigateToLogin(props);
   }
   return (
     <SafeAreaView>
