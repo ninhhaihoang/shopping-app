@@ -6,12 +6,16 @@ import DetailsScreen from "../Shopping/shoppingApp/view/screens/DetailsScreen";
 import Login from "../Shopping/shoppingApp/view/screens/LoginScreen";
 import SignUp from "../Shopping/shoppingApp/view/screens/SignUpScreen";
 import CartScreen from "../Shopping/shoppingApp/view/screens/CartScreen";
-import React from "react";
+import React, {useState} from "react";
 import { StatusBar } from "react-native";
 import COLORS from "./shoppingApp/consts/colors";
+import AuthContext from "./shoppingApp/auth/context";
 
 const App = () => {
+
+  const [user, setUser] = useState();
   return (
+    <AuthContext.Provider value={{user, setUser}}>
     <NavigationContainer>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
       <Stack.Navigator screenOptions={{ header: () => null }}>
@@ -22,6 +26,7 @@ const App = () => {
         <Stack.Screen name="Cart" component={CartScreen} />
       </Stack.Navigator>
     </NavigationContainer>
+    </AuthContext.Provider>
   );
 };
 

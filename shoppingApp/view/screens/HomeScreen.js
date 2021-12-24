@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ import APIKit from "../../apis/APIKit";
 import AuthContext from "../../auth/context";
 
 const width = Dimensions.get("screen").width / 2 - 30;
-const HomeScreen = ({ navigation }) => {
+function HomeScreen({ navigation }) {
   const categories = ["STREET WEAR", "HODIE", "PANTS", "SHORT"];
 
   const [categoryIndex, setCategoryIndex] = React.useState(0);
@@ -28,21 +28,25 @@ const HomeScreen = ({ navigation }) => {
 
   const [products, setProducts] = useState([]);
 
-  const [user, setUser] = useState();
+  const { user, setUser } = useContext(AuthContext);
 
   useEffect(() => {
     getProductsFromAPI();
   }, []);
 
-  function getProductsFromAPI() {
-    APIKit.get("products") // request content
-      .then(async function (response) {
-        setProducts(response.data);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  }
+  const getProductsFromAPI = async () => {
+    try {
+      const response = await APIKit.get("products"); // request content
+
+      setProducts(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+  };
 
   const TabList = () => {
     return (
@@ -190,17 +194,15 @@ const HomeScreen = ({ navigation }) => {
           <Icon name="shopping-cart" size={28} />
         </TouchableOpacity>
       </View>
-      <AuthContext.Provider value={{ user, setUser }}>
 
-          {user ? (
-            <Text>user.name </Text>
-          ) : (
-            <View>
-            <TabList />
-            </View>
-          )}
-
-      </AuthContext.Provider>
+      {user ? (
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+        <Text>{user.name}</Text>
+          <Text onPress={handleLogout}>Logout</Text>
+        </View>
+      ) : (
+        <TabList />
+      )}
 
       <View style={{ marginTop: 30, flexDirection: "row" }}>
         <View style={style.searchContainer}>
@@ -223,7 +225,7 @@ const HomeScreen = ({ navigation }) => {
       />
     </View>
   );
-};
+}
 
 const style = StyleSheet.create({
   header: {

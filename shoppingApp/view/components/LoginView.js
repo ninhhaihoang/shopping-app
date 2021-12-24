@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useContext } from "react";
 import {
   View,
   Text,
@@ -12,15 +12,15 @@ import APIKit, { setClientToken } from "../../apis/APIKit";
 import HomeScreen from "../screens/HomeScreen";
 import COLORS from "../../consts/colors";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import AuthContext from "../../auth/context";
 
-const initialState = {
+export const initialState = {
   email: "",
   password: "",
   errors: {},
   isAuthorized: false,
   isLoading: false,
 };
-
 class LoginView extends Component {
   state = initialState;
 
@@ -40,9 +40,10 @@ class LoginView extends Component {
     console.log(payload);
 
     const onSuccess = ({ data }) => {
-      // Set JSON Web Token on success
+      // Set JSON Web Token on success      
       setClientToken(data.token);
       this.setState({ isLoading: false, isAuthorized: true });
+      console.log("dang nhap thanh cong:", data);
     };
 
     const onFailure = (error) => {

@@ -10,8 +10,12 @@ let APIKit = axios.create({
 export const setClientToken = (token) => {
   APIKit.interceptors.request.use(function (config) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log("setClientToken:", config);
     return config;
   });
 };
+
+// Alter defaults after instance has been created
+// APIKit.defaults.headers.common['Authorization'] = AUTH_TOKEN;
 
 export default APIKit;
