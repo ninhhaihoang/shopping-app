@@ -72,10 +72,17 @@ function DetailsScreen({ navigation, route }) {
     }
     setNewOrder(order);
 
-    console.log(order);
+    
     try {
 			const response = await APIKit.post("admin-order", order)
 			if (response.data.success) {
+        Alert.alert(
+          "Thông báo",
+          "Đã xác nhận mua hàng",
+          [
+            { text: "OK", onPress: () => console.log("OK Pressed") }
+          ]
+        );
 				return response.data
 			}
 		} catch (error) {
@@ -108,7 +115,15 @@ function DetailsScreen({ navigation, route }) {
     >
       <View style={style.header}>
         <Icon name="arrow-back" size={28} onPress={() => navigation.goBack()} />
-        <Icon name="shopping-cart" size={28} />
+        {user ? (
+          <TouchableOpacity onPress={() => navigation.navigate("Cart")}>
+            <Icon name="shopping-cart" size={28} />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <Icon name="shopping-cart" size={28} />
+          </TouchableOpacity>
+        )}
       </View>
       <View style={style.imageContainer}>
         <Image
@@ -272,20 +287,6 @@ function DetailsScreen({ navigation, route }) {
                   </View>
                 </TouchableOpacity>
             )}
-            {/* <TouchableOpacity>
-              <View style={style.buyBtn}>
-                <Text
-                  style={{
-                    color: COLORS.white,
-                    fontSize: 18,
-                    fontWeight: "bold",
-                  }}
-                  onPress={() => navigation.navigate("Login")}
-                >
-                  Buy
-                </Text>
-              </View>
-            </TouchableOpacity> */}
           </View>
         </View>
       </View>
