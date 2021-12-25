@@ -73,15 +73,6 @@ function Login({ navigation }) {
   } catch (error) {
     console.log(error);
   }
-    // try {
-    //   const user = response.data;
-    //   JSON.stringify(user);
-    //   JSON.parse(user.object);
-    //   console.log(user);
-    //   // authContext.setUser({...user});
-    // } catch (error) {
-    //   console.log(error);
-    // }
   };
 
   return (
@@ -98,7 +89,7 @@ function Login({ navigation }) {
             color: COLORS.orange,
           }}
         >
-          Oliva Shop
+          Shop thời trang
         </Text>
       </View>
       <Text style={{ marginLeft: 20, fontSize: 15 }}>Username: </Text>

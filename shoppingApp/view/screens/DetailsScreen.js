@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -6,30 +6,98 @@ import {
   Image,
   Platform,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import RNPickerSelect from "react-native-picker-select";
-import { Rating} from "react-native-ratings";
+import { Rating } from "react-native-ratings";
 import COLORS from "../../consts/colors";
+import AuthContext from "../../auth/context";
+import APIKit from "../../apis/APIKit";
 
-const DetailsScreen = ({ navigation, route }) => {
+function DetailsScreen({ navigation, route }) {
   const product = route.params;
+
+  const { user, setUser } = useContext(AuthContext);
 
   const [quantityValue, setQuantityValue] = useState(0);
 
-  function increaseQuantityHandler() {
+  const [sizeValue, setSizeValue] = useState();
+
+  const [colorValue, setColorValue] = useState();
+
+  const [newOrder, setNewOrder] = useState({
+    user: "",
+    shippingAddress: [{
+      address: "",
+      city: "",
+      postalcode: "",
+      country: ""
+    }],
+		orderItems: [{
+		'code': '',
+		'qty': '',
+		'size': '',
+		'color': '',
+    'realname': '',
+    'cost': '',
+    'image': '',
+	}],
+		totalPrice: '',
+		isPaid: false,
+		isDelivered: false,
+	})
+
+  const handleBuyBtn = async () => {
+    const order = {
+      user: user.id,
+      shippingAddress: [{
+        address: user.address,
+        city: user.city,
+        postalcode: user.postalcode,
+        country: user.country,
+      }],
+      orderItems: [{
+        code: product._id,
+        realname: product.realname,
+        image: product.image[0],
+        cost: product.cost,
+        qty: quantityValue,
+        size: sizeValue,
+        color: colorValue 
+    }],
+      totalPrice: quantityValue*product.cost,
+      isPaid: false,
+      isDelivered: false,
+    }
+    setNewOrder(order);
+
+    console.log(order);
+    try {
+			const response = await APIKit.post("admin-order", order)
+			if (response.data.success) {
+				return response.data
+			}
+		} catch (error) {
+			return error.response.data
+				? error.response.data
+				: { success: false, message: 'Server error' }
+		}
+
+  }
+
+  const increaseQuantityHandler = () => {
     setQuantityValue(function (prev) {
       return prev + 1;
     });
-  }
+  };
 
-  function decreaseQuantityHandler() {
+  const decreaseQuantityHandler = () => {
     setQuantityValue(function (prev) {
       if (prev === 0) return prev;
       return prev - 1;
     });
-  }
-
+  };
   return (
     <View
       style={{
@@ -44,7 +112,7 @@ const DetailsScreen = ({ navigation, route }) => {
       </View>
       <View style={style.imageContainer}>
         <Image
-          source={{uri:product.image[0]}}
+          source={{ uri: product.image[0] }}
           // source={require('../../assets/3.png')}
           style={
             Platform.OS === "ios"
@@ -119,29 +187,29 @@ const DetailsScreen = ({ navigation, route }) => {
           >
             <RNPickerSelect
               style={pickerSelectStyles}
-              onValueChange={(value) => console.log(value)}
+              onValueChange={(value) => setSizeValue(value)}
               placeholder={{
                 label: "Select a size...",
                 value: null,
               }}
-              items={[
-                { label: "M", value: "M" },
-                { label: "L", value: "L" },
-              ]}
+              useNativeAndroidPickerStyle={false}
+              items={product.size.map((item) => ({
+                label: item,
+                value: item,
+              }))}
             />
             <RNPickerSelect
               style={pickerSelectStyles}
-              onValueChange={(value) => console.log(value)}
+              onValueChange={(value) => setColorValue(value)}
               placeholder={{
                 label: "Select a color...",
                 value: null,
               }}
               useNativeAndroidPickerStyle={false}
-              items={[
-                { label: "Red", value: "Red" },
-                { label: "Black", value: "Black" },
-                { label: "White", value: "White" },
-              ]}
+              items={product.color.map((item) => ({
+                label: item,
+                value: item,
+              }))}
             />
           </View>
           <View
@@ -152,7 +220,7 @@ const DetailsScreen = ({ navigation, route }) => {
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <TouchableOpacity onPress={decreaseQuantityHandler}>
+              <TouchableOpacity onPress={decreaseQuantityHandler}>
                 <View style={style.borderBtn}>
                   <Text style={style.borderBtnText}>-</Text>
                 </View>
@@ -172,23 +240,58 @@ const DetailsScreen = ({ navigation, route }) => {
                 </View>
               </TouchableOpacity>
             </View>
-            <View style={style.buyBtn}>
-              <Text
-                style={{
-                  color: COLORS.white,
-                  fontSize: 18,
-                  fontWeight: "bold",
-                }}
-              >
-                Buy
-              </Text>
-            </View>
+
+            {user ? (
+                <TouchableOpacity>
+                  <View style={style.buyBtn}>
+                    <Text
+                      style={{
+                        color: COLORS.white,
+                        fontSize: 18,
+                        fontWeight: "bold",
+                      }}
+                      onPress={handleBuyBtn}
+                    >
+                      Buy
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+            ) : (
+                <TouchableOpacity>
+                  <View style={style.buyBtn}>
+                    <Text
+                      style={{
+                        color: COLORS.white,
+                        fontSize: 18,
+                        fontWeight: "bold",
+                      }}
+                      onPress={() => navigation.navigate("Login")}
+                    >
+                      Buy
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+            )}
+            {/* <TouchableOpacity>
+              <View style={style.buyBtn}>
+                <Text
+                  style={{
+                    color: COLORS.white,
+                    fontSize: 18,
+                    fontWeight: "bold",
+                  }}
+                  onPress={() => navigation.navigate("Login")}
+                >
+                  Buy
+                </Text>
+              </View>
+            </TouchableOpacity> */}
           </View>
         </View>
       </View>
     </View>
   );
-};
+}
 
 const style = StyleSheet.create({
   header: {

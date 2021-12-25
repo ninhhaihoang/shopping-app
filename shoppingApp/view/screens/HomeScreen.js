@@ -10,19 +10,21 @@ import {
   Image,
   Platform,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import COLORS from "../../consts/colors";
 //import products from "../../consts/products";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Rating, AirbnbRating } from "react-native-ratings";
 import { NavigationContainer } from "@react-navigation/native";
+import categories from "../../consts/categories";
 import APIKit from "../../apis/APIKit";
 import AuthContext from "../../auth/context";
 
 const width = Dimensions.get("screen").width / 2 - 30;
 function HomeScreen({ navigation }) {
-  const categories = ["STREET WEAR", "HODIE", "PANTS", "SHORT"];
+  // const categories = ["STREET WEAR", "HODIE", "PANTS", "SHORT"];
 
-  const [categoryIndex, setCategoryIndex] = React.useState(0);
+  const [categoryIndex, setCategoryIndex] = React.useState();
 
   const tabs = ["Login", "SignUp"];
 
@@ -44,6 +46,74 @@ function HomeScreen({ navigation }) {
     }
   };
 
+  const onProductCategory1 = async () => {
+    try {
+      const response = await APIKit.get(
+        `products?page=&&filters=&&types=&&categories=${categoryIndex}`
+      ); // request content
+      setProducts(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Cái useEffect dùng với tham số thứ 2 là 1 biến thì nó sẽ thực hiện khi giá trị của biến đó thay đổi
+  useEffect(() => {
+    onProductCategory1();
+  }, categoryIndex);
+
+  // const getCategoriesFromAPI = async () => {
+  //   try {
+  //     const response = await APIKit.get("products/categoryProduct/category"); // request content
+
+  //     setCategories(response.data);
+
+  //     console.log(response.data);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  // const handleSetCategory = (item) => {
+  //   console.log(item);
+  // }
+
+  const CategoryList = () => {
+    return (
+      <ScrollView
+        horizontal
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={style.categoryListContainer}
+      >
+        {categories.map((item) => (
+          <TouchableOpacity
+            key={item._id}
+            activeOpacity={0.8}
+            onPress={() => setCategoryIndex(item._id)}
+          >
+            <View
+              style={{
+                ...style.categoryBtn,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 15,
+                  fontWeight: "bold",
+                  marginLeft: 5,
+                  alignItems: "center",
+                  color: categoryIndex == item._id ? COLORS.red : COLORS.orange,
+                }}
+              >
+                {item.realname}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    );
+  };
+
   const handleLogout = () => {
     setUser(null);
   };
@@ -58,29 +128,6 @@ function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate(`${item}`)}
           >
             <Text style={style.tabTextStyle}> {item} </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    );
-  };
-
-  const CategoryList = () => {
-    return (
-      <View style={style.categoryContainer}>
-        {categories.map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            activeOpacity={0.8}
-            onPress={() => setCategoryIndex(index)}
-          >
-            <Text
-              style={[
-                style.categoryText,
-                categoryIndex == index && style.categoryTextSelected,
-              ]}
-            >
-              {item}
-            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -187,17 +234,23 @@ function HomeScreen({ navigation }) {
           <Text
             style={{ fontSize: 38, fontWeight: "bold", color: COLORS.orange }}
           >
-            Oliva Shop
+            Shop thời trang
           </Text>
         </View>
-        <TouchableOpacity onPress={() => navigation.navigate("Cart")}>
-          <Icon name="shopping-cart" size={28} />
-        </TouchableOpacity>
+        {user ? (
+          <TouchableOpacity onPress={() => navigation.navigate("Cart")}>
+            <Icon name="shopping-cart" size={28} />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <Icon name="shopping-cart" size={28} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {user ? (
-        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-        <Text>{user.name}</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <Text>{user.name}</Text>
           <Text onPress={handleLogout}>Logout</Text>
         </View>
       ) : (
@@ -210,7 +263,7 @@ function HomeScreen({ navigation }) {
           <TextInput placeholder="Search" style={style.input} />
         </View>
       </View>
-      {/* <CategoryList /> */}
+      <CategoryList />
       <FlatList
         columnWrapperStyle={{ justifyContent: "space-between" }}
         showsVerticalScrollIndicator={false}
@@ -264,6 +317,20 @@ const style = StyleSheet.create({
     paddingBottom: 5,
     borderBottomWidth: 2,
     borderColor: COLORS.orange,
+  },
+  categoryListContainer: {
+    paddingVertical: 30,
+    alignItems: "center",
+    // paddingHorizontal: 20,
+  },
+  categoryBtn: {
+    height: 45,
+    width: 120,
+    marginRight: 7,
+    borderRadius: 30,
+    alignItems: "center",
+    paddingHorizontal: 5,
+    flexDirection: "row",
   },
   card: {
     height: 225,

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,65 +11,77 @@ import {
 import products from "../../consts/products";
 import { ScreenContainer } from "react-native-screens";
 import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
-const plus = () => {
-  alert("add");
+import APIKit from "../../apis/APIKit";
+import AuthContext from "../../auth/context";
+
+function Cart({ navigation }) {
+
+  const [orders, setOrders] = useState([]);
+
+  const { user, setUser } = useContext(AuthContext);
+
+  useEffect(() => {
+    getLoginedUserOrder();
+  }, []);
+
+  const config = {
+    headers: { Authorization: `Bearer ${user.token}` }
 };
-const sub = () => {
-  alert("reduce");
-};
-const CardItem = ({ item }) => {
-  return (
-    <View style={styles.containers}>
-      <View style={styles.displayFlexRow}>
-        <Image style={styles.imageStyle} source={item.img} />
-        <View>
-          <Text style={styles.nameProduct}> {item.name}</Text>
-          <Text> {item.about} </Text>
-          <Text style={styles.sizeStyle}> Size: M | Màu: Đen </Text>
-          <Text style={styles.priceStyle}> {item.price} </Text>
-          <View style={styles.displayFlexRow2}>
-            <Text style={{ textTransform: "capitalize" }}> Tạm tính: </Text>
-            <TextInput style={styles.inputSubStyle} value={item.price} />
+
+  const getLoginedUserOrder = async () => {
+    try {
+      const response = await APIKit.get("user-order/myorders", config); // request content
+
+      setOrders(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const CardItem = ({ item }) => {
+    return (
+      <View style={styles.containers}>
+        <View style={styles.displayFlexRow}>
+        <Image
+              style={
+                Platform.OS === "ios"
+                  ? { resizeMode: "contain", flex: 1 }
+                  : { resizeMode: "contain", flex: 1, width: 100, height: 100 }
+              }
+              source={{ uri: item.orderItems[0].image }}
+            />
+          <View>
+            <Text style={styles.nameProduct}> {item.orderItems[0].realname}</Text>
+            <Text style={styles.sizeStyle}>
+              {" "}
+              Size: {item.orderItems[0].size} | Màu: {item.orderItems[0].color} | Số lượng: {item.orderItems[0].qty}{" "}
+            </Text>
+            <Text style={styles.priceStyle}> {item.orderItems[0].cost} </Text>
+            <View style={styles.displayFlexRow2}>
+              <Text style={{ textTransform: "capitalize" }}> Tổng tiền: </Text>
+              <TextInput style={styles.inputSubStyle} value={item.totalPrice} />
+            </View>
           </View>
         </View>
       </View>
-      <View>
-        <TouchableOpacity onPress={plus}>
-          <Text style={styles.buttonStyle}> + </Text>
-        </TouchableOpacity>
-        <TextInput style={styles.inputStyle} value="1" />
-        <TouchableOpacity onPress={sub}>
-          <Text style={styles.buttonStyle}> - </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
-const Cart = () => {
+    );
+  };
+
   return (
     <SafeAreaView>
       <Text style={{ textAlign: "center", fontSize: 20, marginBottom: 10 }}>
         {" "}
-        Cart{" "}
+        Lịch sử mua hàng{" "}
       </Text>
       <FlatList
         style={styles.scrollViewStyle}
-        data={products}
+        data={orders}
         renderItem={({ item }) => <CardItem item={item} />}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
       />
-      <View style={styles.totalStyle}>
-        <Text style={{ fontSize: 18 }}> Total: </Text>
-        <Text style={styles.totalPrice}> ????đ </Text>
-      </View>
-      <View>
-        <TouchableOpacity>
-          <Text style={styles.buttonBuy}> BUY </Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
-};
+}
 const styles = StyleSheet.create({
   imageStyle: {
     maxWidth: 120,
@@ -134,7 +146,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     paddingRight: 5,
   },
-  scrollViewStyle: { height: "80%" },
+  scrollViewStyle: { height: "100%" },
   totalPrice: { fontWeight: "bold", fontSize: 16 },
   totalStyle: {
     marginTop: 10,

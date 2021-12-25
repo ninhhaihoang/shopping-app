@@ -14,7 +14,13 @@ const SignUp = (props) => {
     name: "",
     email: "",
     password: "",
+    address: "",
+    city: "",
+    postalcode: "",
     check_nameInputChange: false,
+    check_addressInputChange: false,
+    check_cityInputChange: false,
+    check_postalcodeInputChange: false,
     check_emailInputChange: false,
     secureTextEntry: true,
     confirm_secureTextEntry: true,
@@ -31,6 +37,51 @@ const SignUp = (props) => {
         ...data,
         name: val,
         check_nameInputChange: false,
+      });
+    }
+  };
+  const addressInputChange = (val) => {
+    if (val.lenght !== 0) {
+      setData({
+        ...data,
+        address: val,
+        check_addressInputChange: true,
+      });
+    } else {
+      setData({
+        ...data,
+        address: val,
+        check_addressInputChange: false,
+      });
+    }
+  };
+  const cityInputChange = (val) => {
+    if (val.lenght !== 0) {
+      setData({
+        ...data,
+        city: val,
+        check_cityInputChange: true,
+      });
+    } else {
+      setData({
+        ...data,
+        city: val,
+        check_cityInputChange: false,
+      });
+    }
+  };
+  const postalcodeInputChange = (val) => {
+    if (val.lenght !== 0) {
+      setData({
+        ...data,
+        postalcode: val,
+        check_postalcodeInputChange: true,
+      });
+    } else {
+      setData({
+        ...data,
+        postalcode: val,
+        check_postalcodeInputChange: false,
       });
     }
   };
@@ -107,6 +158,73 @@ const SignUp = (props) => {
           <Feather name="check-circle" size={22} />
         ) : null}
       </View>
+
+      <Text style={{ marginLeft: 20, fontSize: 15 }}>Address: </Text>
+      <View
+        style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 20 }}
+      >
+        <FontAwesome
+          name="user"
+          color="#05375a"
+          size={20}
+          display="inline"
+          style={{ marginLeft: 20, marginTop: 5 }}
+        />
+        <TextInput
+          placeholder="Your address"
+          style={styles.TextInputStyle}
+          onChangeText={(val) => addressInputChange(val)}
+        />
+
+        {data.check_addressInputChange ? (
+          <Feather name="check-circle" size={22} />
+        ) : null}
+      </View>
+
+      <Text style={{ marginLeft: 20, fontSize: 15 }}>City: </Text>
+      <View
+        style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 20 }}
+      >
+        <FontAwesome
+          name="user"
+          color="#05375a"
+          size={20}
+          display="inline"
+          style={{ marginLeft: 20, marginTop: 5 }}
+        />
+        <TextInput
+          placeholder="Your city"
+          style={styles.TextInputStyle}
+          onChangeText={(val) => cityInputChange(val)}
+        />
+
+        {data.check_cityInputChange ? (
+          <Feather name="check-circle" size={22} />
+        ) : null}
+      </View>
+
+      <Text style={{ marginLeft: 20, fontSize: 15 }}>postalcode: </Text>
+      <View
+        style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 20 }}
+      >
+        <FontAwesome
+          name="user"
+          color="#05375a"
+          size={20}
+          display="inline"
+          style={{ marginLeft: 20, marginTop: 5 }}
+        />
+        <TextInput
+          placeholder="Your postalcode"
+          style={styles.TextInputStyle}
+          onChangeText={(val) => postalcodeInputChange(val)}
+        />
+
+        {data.check_postalcodeInputChange ? (
+          <Feather name="check-circle" size={22} />
+        ) : null}
+      </View>
+
       <Text style={{ marginLeft: 20, fontSize: 15 }}>Email: </Text>
       <View
         style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 20 }}
