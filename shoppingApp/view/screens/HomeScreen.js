@@ -57,26 +57,27 @@ function HomeScreen({ navigation }) {
     }
   };
 
+  const searchInputChange = async (val) => {
+    setTimeout(async () => {
+      console.log(val);
+
+        try {
+          const response = await APIKit.get(
+            `products?page=&&filters=${val}&&types=&&categories=`
+          ); // request content
+          setProducts(response.data);
+        } catch (error) {
+          console.log(error);
+        }
+
+    }, 500)
+  }
+
   // Cái useEffect dùng với tham số thứ 2 là 1 biến thì nó sẽ thực hiện khi giá trị của biến đó thay đổi
   useEffect(() => {
     onProductCategory1();
   }, categoryIndex);
 
-  // const getCategoriesFromAPI = async () => {
-  //   try {
-  //     const response = await APIKit.get("products/categoryProduct/category"); // request content
-
-  //     setCategories(response.data);
-
-  //     console.log(response.data);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
-  // const handleSetCategory = (item) => {
-  //   console.log(item);
-  // }
 
   const CategoryList = () => {
     return (
@@ -260,7 +261,11 @@ function HomeScreen({ navigation }) {
       <View style={{ marginTop: 30, flexDirection: "row" }}>
         <View style={style.searchContainer}>
           <Icon name="search" size={25} style={{ marginLeft: 20 }} />
-          <TextInput placeholder="Search" style={style.input} />
+          <TextInput
+            placeholder="Search"
+            style={style.input}
+            onChangeText={(val) => searchInputChange(val)}
+          />
         </View>
       </View>
       <CategoryList />
